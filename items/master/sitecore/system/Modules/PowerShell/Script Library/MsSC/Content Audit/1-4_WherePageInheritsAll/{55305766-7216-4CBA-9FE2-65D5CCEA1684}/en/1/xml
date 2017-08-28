@@ -1,0 +1,50 @@
+<item name="1-4_WherePageInheritsAll" key="1-4_wherepageinheritsall" id="{55305766-7216-4CBA-9FE2-65D5CCEA1684}" tid="{DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}" mid="{00000000-0000-0000-0000-000000000000}" sortorder="300" language="en" version="1" template="powershell script" parentid="{105F8139-F963-4EB1-AB1C-7F2E21FD5B07}"><fields><field tfid="{BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}" key="__updated by" type="text"><content>sitecore\admin</content></field><field tfid="{8CDC337E-A112-42FB-BBB4-4143751E123F}" key="__revision" type="text"><content>b613bfd6-bd78-42bf-9eea-dfbe9223bef0</content></field><field tfid="{25BED78C-4957-4165-998A-CA1B52F67497}" key="__created" type="datetime"><content>20170807T173603Z</content></field><field tfid="{D9CF14B1-FA16-4BA6-9288-E8A174D4D522}" key="__updated" type="datetime"><content>20170808T201555Z</content></field><field tfid="{B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0}" key="script" type="Multi-Line Text"><content># This script completes scenarios 1-4 
+# For a given UI component which pages across all tenants host this component?
+# For a given UI component which lang-locale pages across all tenants host this component?
+# For a given page how many UI components are hosted on it? If lang-loc is not specified in page URL, then list all UI components across all  lang-locales of the page?
+# Provide a full listing of all pages, with their lang-locale combinations and all UI components hosted on them. 
+Invoke-Script "/MsSC/Content Audit/InputTemplate"
+
+$result = Read-Variable @props1_4
+if($result -eq "cancel") {
+    exit
+}
+
+# filtering function
+filter Where-InheritsTemplate {
+    param(
+        [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+        [Sitecore.Data.Items.Item]$item
+    )
+    
+    if ($item) {
+        $itemTemplate = [Sitecore.Data.Managers.TemplateManager]::GetTemplate($item)
+
+        if ($itemTemplate.DescendsFromOrEquals($baseTemplate.ID)) {
+            if($Item."__Updated" -le $Before) {
+                if($Item."__Updated" -ge $After) {
+                    $Item
+                }
+            } 
+        }
+    }
+}
+
+# handles the language if none is specified
+if($lang.Name -eq "Global Locales") {
+    $lang ="*"
+} else {
+    $lang = $lang.Name
+}
+#finalizes and filters the items
+$items = Get-ChildItem -Path $root.ProviderPath -Recurse -Language $lang | Where-InheritsTemplate 
+
+if ($lang -eq "*"){
+    $languageName = "all languages"
+} else {
+    $languageName = $lang + " language"
+}
+
+$num = "1_4"
+Invoke-Script "/MsSC/Content Audit/OutputTemplate"
+</content></field></fields></item>

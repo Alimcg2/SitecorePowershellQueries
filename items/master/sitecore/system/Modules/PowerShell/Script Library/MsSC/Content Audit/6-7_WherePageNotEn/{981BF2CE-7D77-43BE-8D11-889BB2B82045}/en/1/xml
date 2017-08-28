@@ -1,0 +1,38 @@
+<item name="6-7_WherePageNotEn" key="6-7_wherepagenoten" id="{981BF2CE-7D77-43BE-8D11-889BB2B82045}" tid="{DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}" mid="{00000000-0000-0000-0000-000000000000}" sortorder="300" language="en" version="1" template="powershell script" parentid="{105F8139-F963-4EB1-AB1C-7F2E21FD5B07}"><fields><field tfid="{BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}" key="__updated by" type="text"><content>sitecore\admin</content></field><field tfid="{8CDC337E-A112-42FB-BBB4-4143751E123F}" key="__revision" type="text"><content>2a3e9608-9ec3-443a-bc06-10a8ec24aa09</content></field><field tfid="{25BED78C-4957-4165-998A-CA1B52F67497}" key="__created" type="datetime"><content>20170808T183646Z</content></field><field tfid="{D9CF14B1-FA16-4BA6-9288-E8A174D4D522}" key="__updated" type="datetime"><content>20170808T201712Z</content></field><field tfid="{B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0}" key="script" type="Multi-Line Text"><content>#this completes scenario 6 and 7
+# Provide a list of pages that have content only in specific lang-locales and not in its vorporate version. 
+
+Invoke-Script "/MsSC/Content Audit/InputTemplate"
+
+$result = Read-Variable @props6_7
+if($result -eq "cancel") {
+    exit
+}
+
+
+# gets all items within the path
+$path = $root.ItemPath
+$items = @()
+$itemsAll = Get-ChildItem -Path $path -Recurse -Language "*"
+$page = "{78C0647F-253E-4748-A0AB-9EC624874BF1}"
+$overallTotal = $itemsAll.Count
+$totalWithoutEN = 0
+# for each item within the path, check to see if there is no english version
+foreach($item in $itemsAll) {
+        $allLangs = Get-Item -Path $path -Id $item.Id.Guid -Language "*"
+        $numVersions = $allLangs.Versions.Count
+        $total = $numVersions
+        foreach ($version in $allLangs){
+            if ($version.Language -ne "en"){
+                $total -= 1
+            }
+        }
+        if ($total -eq 0){
+            $items += , $allLangs
+            $totalWithoutEN += 1
+        }
+}
+$percent = [math]::Round((($totalWithoutEN / $overallTotal) * 100), 2)
+Show-Alert "$percent% do not have an english version. Out of $overallTotal, there are $totalWithoutEN without an en version."
+ 
+$num = "6_7"
+Invoke-Script "/MsSC/Content Audit/OutputTemplate"</content></field></fields></item>

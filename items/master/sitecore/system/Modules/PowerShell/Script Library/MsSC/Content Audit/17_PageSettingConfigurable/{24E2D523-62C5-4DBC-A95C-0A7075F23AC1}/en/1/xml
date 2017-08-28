@@ -1,0 +1,51 @@
+<item name="17_PageSettingConfigurable" key="17_pagesettingconfigurable" id="{24E2D523-62C5-4DBC-A95C-0A7075F23AC1}" tid="{DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}" mid="{00000000-0000-0000-0000-000000000000}" sortorder="300" language="en" version="1" template="powershell script" parentid="{105F8139-F963-4EB1-AB1C-7F2E21FD5B07}"><fields><field tfid="{BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}" key="__updated by" type="text"><content>sitecore\admin</content></field><field tfid="{8CDC337E-A112-42FB-BBB4-4143751E123F}" key="__revision" type="text"><content>f448ac0d-b1d5-4202-b6c2-106000824dd4</content></field><field tfid="{25BED78C-4957-4165-998A-CA1B52F67497}" key="__created" type="datetime"><content>20170807T202858Z</content></field><field tfid="{D9CF14B1-FA16-4BA6-9288-E8A174D4D522}" key="__updated" type="datetime"><content>20170808T201630Z</content></field><field tfid="{B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0}" key="script" type="Multi-Line Text"><content># this completes scenario 17
+# For a given UI component  provide a list of settings/options that are configured on the component.
+Invoke-Script "/MsSC/Content Audit/InputTemplate"
+
+$result = Read-Variable @props17
+if($result -eq "cancel") {
+    exit
+}
+
+$path = $root.ItemPath
+$items = Get-ChildItem -Path $path -Recurse -Language "*"
+
+$tabName = "Item Table"
+#Create Table object
+$table = New-Object system.Data.DataTable “$tabName”
+$nameColumn = New-Object system.Data.DataColumn Name,([string])
+$table.columns.add($nameColumn)
+#insert columns
+foreach ($item in $items){
+    $itemFields = $item | Get-ItemField
+    foreach($field in $itemFields){
+        if ($table.columns.ColumnName -Contains $field){
+        } else {
+            $field = New-Object system.Data.DataColumn $field,([string])
+            $table.columns.add($field)
+        }
+    }
+}
+#insert rows
+foreach($item in $items){
+    #Create a row
+    $row = $table.NewRow()
+    $row.Name = $item.Name
+    if ($item.Name -ne "_PageContent"){
+        for ($i = 1; $i -lt $table.columns.Count; $i ++){
+            $columnName = $table.columns[$i]
+            $id = $item.$columnName
+            if ($id.length -eq 38){
+                $value = (Get-Item -Path master: -Id $id).Name
+                $row.$columnName = $value
+            } else {
+                $row.$columnName = $id
+            }
+        }
+        $table.Rows.Add($row)
+    }
+}
+
+#Display the table
+$table | Show-ListView
+</content></field></fields></item>

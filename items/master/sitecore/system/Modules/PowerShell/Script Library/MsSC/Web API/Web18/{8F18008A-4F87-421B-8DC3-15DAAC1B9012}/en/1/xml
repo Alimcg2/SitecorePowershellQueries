@@ -1,0 +1,29 @@
+<item name="Web18" key="web18" id="{8F18008A-4F87-421B-8DC3-15DAAC1B9012}" tid="{DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}" mid="{00000000-0000-0000-0000-000000000000}" sortorder="300" language="en" version="1" template="powershell script" parentid="{27D587C6-7957-4582-85A4-054DA14021FE}"><fields><field tfid="{BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}" key="__updated by" type="text"><content>sitecore\admin</content></field><field tfid="{8CDC337E-A112-42FB-BBB4-4143751E123F}" key="__revision" type="text"><content>76beb486-d63d-4071-90c5-124750b57193</content></field><field tfid="{25BED78C-4957-4165-998A-CA1B52F67497}" key="__created" type="datetime"><content>20170808T152243Z</content></field><field tfid="{D9CF14B1-FA16-4BA6-9288-E8A174D4D522}" key="__updated" type="datetime"><content>20170808T163641Z</content></field><field tfid="{B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0}" key="script" type="Multi-Line Text"><content>#this completes scenario 18
+
+# gets all items within the path
+$itemsAll = Get-ChildItem -Path $path -Language "*" -Recurse
+$items = @()
+# makes sure there is a workflow state
+foreach ($item in $itemsAll){
+    if ($item."__Workflow state"){
+        $workflowItem = Get-Item -Path master: -Id $item."__Workflow state"
+        if ($workflow -eq "all"){
+            $items = $items + $item
+        } elseif ($workflowItem.Name -like $workflow){
+            $items = $items + $item
+        }
+    }
+}
+
+$items | Select-Object @{Label="Icon"; Expression={$_.__Icon} },
+            @{Label="Workflow State"; Expression={(Get-Item -Path master -Id ($_."__Workflow state")).Name } },
+            @{Label="Name"; Expression={$_.DisplayName} },
+            @{Label="Language"; Expression={$_.Language} },
+            @{Label="Updated"; Expression={$_.__Updated} },
+            @{Label="Updated by"; Expression={$_."__Updated by"} },
+            @{Label="Created"; Expression={$_.__Created} },
+            @{Label="Created by"; Expression={$_."__Created by"} },
+            @{Label="Path"; Expression={$_.ItemPath} },
+            @{Label="Id"; Expression={$_.Id} } | ConvertTo-Csv
+            
+</content></field></fields></item>

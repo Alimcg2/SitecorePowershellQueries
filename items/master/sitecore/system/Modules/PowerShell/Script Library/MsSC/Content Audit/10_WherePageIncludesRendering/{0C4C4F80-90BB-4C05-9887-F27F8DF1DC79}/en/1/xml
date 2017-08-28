@@ -1,0 +1,30 @@
+<item name="10_WherePageIncludesRendering" key="10_wherepageincludesrendering" id="{0C4C4F80-90BB-4C05-9887-F27F8DF1DC79}" tid="{DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}" mid="{00000000-0000-0000-0000-000000000000}" sortorder="300" language="en" version="1" template="powershell script" parentid="{105F8139-F963-4EB1-AB1C-7F2E21FD5B07}"><fields><field tfid="{BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}" key="__updated by" type="text"><content>sitecore\admin</content></field><field tfid="{8CDC337E-A112-42FB-BBB4-4143751E123F}" key="__revision" type="text"><content>8f70a65c-f7af-448f-af60-12976c9e910b</content></field><field tfid="{25BED78C-4957-4165-998A-CA1B52F67497}" key="__created" type="datetime"><content>20170807T190437Z</content></field><field tfid="{D9CF14B1-FA16-4BA6-9288-E8A174D4D522}" key="__updated" type="datetime"><content>20170808T201513Z</content></field><field tfid="{B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0}" key="script" type="Multi-Line Text"><content># this completes scenario 10
+# For a given UI component list all pages that are included in the rendering (added to presentation details).
+Invoke-Script "/MsSC/Content Audit/InputTemplate"
+
+$result = Read-Variable @props10
+if($result -eq "cancel") {
+    exit
+}
+
+# gets all items within the path
+$path = $root.ItemPath
+$itemsAl = Get-ChildItem -Path $path -Recurse -Language "*"
+$renderId = $rendering.Id.Guid
+$items = @()
+foreach($item in $itemsAll){
+    $renderings = $item | Get-Rendering 
+    foreach($renderItem in $renderings){
+        if($renderItem.ItemId -eq "{$renderId}"){
+            if ($withRendering -Contains $item){
+                "already contains item " + $item.Id.Guid
+            } else {
+                $items = $items + $item
+            }
+        }
+    }
+}
+
+$num = "10"
+Invoke-Script "/MsSC/Content Audit/OutputTemplate"
+</content></field></fields></item>

@@ -1,0 +1,27 @@
+<item name="18_PageApprovalState" key="18_pageapprovalstate" id="{9604E920-8408-41AE-983F-E77B7F427BC6}" tid="{DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}" mid="{00000000-0000-0000-0000-000000000000}" sortorder="300" language="en" version="1" template="powershell script" parentid="{105F8139-F963-4EB1-AB1C-7F2E21FD5B07}"><fields><field tfid="{BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}" key="__updated by" type="text"><content>sitecore\admin</content></field><field tfid="{8CDC337E-A112-42FB-BBB4-4143751E123F}" key="__revision" type="text"><content>2d841376-7415-4d82-9ee8-d03490bd28f9</content></field><field tfid="{25BED78C-4957-4165-998A-CA1B52F67497}" key="__created" type="datetime"><content>20170807T210434Z</content></field><field tfid="{D9CF14B1-FA16-4BA6-9288-E8A174D4D522}" key="__updated" type="datetime"><content>20170808T201644Z</content></field><field tfid="{B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0}" key="script" type="Multi-Line Text"><content>#this completes scenario 18
+
+Invoke-Script "/MsSC/Content Audit/InputTemplate"
+
+$result = Read-Variable @props18
+if($result -eq "cancel") {
+    exit
+}
+
+# gets all items within the path
+$path = $root.ItemPath
+$itemsAll = Get-ChildItem -Path $path -Language "*" -Recurse
+$items = @()
+# makes sure there is a workflow state
+foreach ($item in $itemsAll){
+    if ($item."__Workflow state"){
+        $workflowItem = Get-Item -Path master: -Id $item."__Workflow state"
+        if ($workflow -eq "all"){
+            $items = $items + $item
+        } elseif ($workflowItem.Name -like $workflow){
+            $items = $items + $item
+        }
+    }
+}
+
+$num = "18"
+Invoke-Script "/MsSC/Content Audit/OutputTemplate"</content></field></fields></item>

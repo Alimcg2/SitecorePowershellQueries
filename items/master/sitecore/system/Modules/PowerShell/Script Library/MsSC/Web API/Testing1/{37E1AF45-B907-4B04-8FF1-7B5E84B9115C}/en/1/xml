@@ -1,0 +1,15 @@
+<item name="Testing1" key="testing1" id="{37E1AF45-B907-4B04-8FF1-7B5E84B9115C}" tid="{DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}" mid="{00000000-0000-0000-0000-000000000000}" sortorder="300" language="en" version="1" template="powershell script" parentid="{27D587C6-7957-4582-85A4-054DA14021FE}"><fields><field tfid="{BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}" key="__updated by" type="text"><content>sitecore\admin</content></field><field tfid="{8CDC337E-A112-42FB-BBB4-4143751E123F}" key="__revision" type="text"><content>2309f693-06fc-4ab6-b36e-107be2d646ee</content></field><field tfid="{25BED78C-4957-4165-998A-CA1B52F67497}" key="__created" type="datetime"><content>20170803T213021Z</content></field><field tfid="{D9CF14B1-FA16-4BA6-9288-E8A174D4D522}" key="__updated" type="datetime"><content>20170807T223454Z</content></field><field tfid="{B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0}" key="script" type="Multi-Line Text"><content>
+$items = Get-ChildItem -Path $path -Recurse
+
+$items |
+    Select-Object @{Label="Language"; Expression={$_.Language} },
+        @{Label="Name"; Expression={$_.Name} },
+        @{Label="Placeholder"; Expression={(Get-Rendering -Item $_ ).Placeholder} },
+        @{Label="Path"; Expression={[Sitecore.Links.LinkManager]::GetItemUrl($_)} },
+        @{Label="Created"; Expression={$_.__Created} },
+        @{Label="Created by"; Expression={$_."__Created by"} },
+        @{Label="Updated"; Expression={$_.__Updated} },
+        @{Label="Updated by"; Expression={$_."__Updated by"} },
+        @{Label="Item Id"; Expression={$_.Id} } |  ConvertTo-Csv
+
+</content></field></fields></item>

@@ -1,0 +1,63 @@
+<item name="OutputTemplate" key="outputtemplate" id="{931B0318-0B78-4D03-889D-F4F17D98D5EF}" tid="{DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}" mid="{00000000-0000-0000-0000-000000000000}" sortorder="300" language="en" version="1" template="powershell script" parentid="{105F8139-F963-4EB1-AB1C-7F2E21FD5B07}"><fields><field tfid="{BADD9CF9-53E0-4D0C-BCC0-2D784C282F6A}" key="__updated by" type="text"><content>sitecore\admin</content></field><field tfid="{8CDC337E-A112-42FB-BBB4-4143751E123F}" key="__revision" type="text"><content>ab31c615-07e0-4260-bbe6-ff319b289bcc</content></field><field tfid="{25BED78C-4957-4165-998A-CA1B52F67497}" key="__created" type="datetime"><content>20170807T174539Z</content></field><field tfid="{D9CF14B1-FA16-4BA6-9288-E8A174D4D522}" key="__updated" type="datetime"><content>20170808T203214Z</content></field><field tfid="{B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0}" key="script" type="Multi-Line Text"><content>$tableBase = @{Label="Icon"; Expression={$_.__Icon} },
+            @{Label="Name"; Expression={$_.DisplayName} },
+            @{Label="Language"; Expression={$_.Language} },
+            @{Label="Updated"; Expression={$_.__Updated} },
+            @{Label="Updated by"; Expression={$_."__Updated by"} },
+            @{Label="Created"; Expression={$_.__Created} },
+            @{Label="Created by"; Expression={$_."__Created by"} },
+            @{Label="Path"; Expression={$_.ItemPath} },
+            @{Label="Id"; Expression={$_.Id} }
+
+$table1_4 = $tableBase + 
+            @{Label="No. of Desc."; Expression={if($_.TemplateName -eq "Page"){$_.Children.Children.Count} else {$_.Children.Count}} }
+$table10 = $tableBase + 
+            @{Label="Original Rendering"; Expression={$rendering.Name} }
+$table16 = $tableBase + @(
+            @{Label="Placeholder"; Expression={(Get-Rendering -Item $_ ).Placeholder} },
+            @{Label="URL"; Expression={[Sitecore.Links.LinkManager]::GetItemUrl( $_ )} })
+$table18 = $tableBase + 
+            @{Label="Workflow State"; Expression={(Get-Item -Path master -Id ($_."__Workflow state")).Name } }
+     
+$props = @{
+    Title = "Item Report"
+    InfoTitle = "Item Report"
+    PageSize = 25
+}    
+
+if ($num -eq "1_4"){
+    $table = $table1_4
+    $props  = $props + @{InfoDescription =  "The following items all inherit from the '$($baseTemplate.Name)' template, are in $languageName, and was created between $after and $before."}
+} elseif ($num -eq "5"){
+    $table = $tableBase   
+    $props  = $props + @{InfoDescription =  "The following items all inherit from the '$($baseTemplate.Name)' template."}
+} elseif ($num -eq "6_7"){
+    $table = $tableBase    
+    $props  = $props + @{InfoDescription =  "The following items all do not have an english version."}
+} elseif ($num -eq "8_9"){
+    $table = $tableBase    
+    $props  = $props + @{InfoDescription =  "The following items were created between $after and $before and show who they were created by."}
+} elseif ($num -eq "10"){
+    $table = $table10    
+    $props  = $props + @{InfoDescription =  "The following items all inherit from the rendering '$($rendering.Name)'."}
+} elseif ($num -eq "16"){
+    $table = $table16    
+    $props  = $props + @{InfoDescription =  "The following items all show their placeholder and URL path."}
+} elseif ($num -eq "17"){
+    $table = $table17
+    $props  = $props + @{InfoDescription =  "The following items all show their list of settings."}
+}elseif ($num -eq "18"){
+    $table = $table18    
+    $props  = $props + @{InfoDescription =  "The following items all show their workflow status."}
+}
+
+# returns the table
+if($items.Count -eq 0) {
+    Show-Alert "There are no content items that inherit from this template"
+} else {
+    
+    $items |
+        Show-ListView @props -Property $table
+}
+
+Close-Window
+</content></field></fields></item>
